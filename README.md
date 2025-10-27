@@ -22,6 +22,7 @@ Smart Content Access provides a flexible, cache-friendly content gating system f
 * **Flexible Logic**: Use "any" (OR) or "all" (AND) logic for multiple requirements
 * **Page Builder Compatible**: Integrates with Elementor and Beaver Builder widgets
 * **Simple Shortcodes**: Easy-to-use shortcodes for members, guests, and conditional rendering
+* **Menu Visibility Control**: Control WordPress menu item visibility based on user status, roles, or MemberPress subscriptions
 
 ### Access Control Options
 
@@ -54,10 +55,12 @@ No. The plugin works without MemberPress. MemberPress integration is optional an
 ### Does it work with page builders?
 
 Yes, Smart Content Access integrates with:
-* Elementor
-* Beaver Builder
+* **Elementor** - Native "SCA Content Gate" widget with visual controls
+* **Beaver Builder** - Native "SCA Content Gate" module with visual controls
 
-Widgets are available in the page builder interface when these plugins are active.
+When Elementor or Beaver Builder is active, dedicated widgets/modules appear in the page builder interface. These widgets render content dynamically (server-side) to prevent caching issues and provide a user-friendly visual interface for setting access rules.
+
+You can also use the shortcodes via the Shortcode/Text widgets in both page builders.
 
 ### Can I use multiple access methods together?
 
@@ -95,9 +98,15 @@ Render featured image:
 [sca_render source="featured_image" image_size="large"]
 ```
 
-Render a shortcode conditionally:
+Render post excerpt (great for previews):
 ```
-[sca_render source="shortcode" short='[your_custom_shortcode]']
+[sca_render source="post_excerpt"]
+```
+*Note: When generating excerpts automatically, all non-text content (images, embeds, videos, shortcodes, URLs) is stripped to ensure clean text-only previews.*
+
+Render a shortcode conditionally (brackets optional - will be added automatically):
+```
+[sca_render source="shortcode" short='your_custom_shortcode']
 ```
 
 #### Member Only / Guest Only
@@ -118,6 +127,31 @@ Invert access (show content to unauthorized users):
 [sca_gate roles="administrator" invert="1"]Content NOT for administrators[/sca_gate]
 ```
 
+### Using Page Builder Widgets
+
+#### Elementor
+1. Open any Elementor page/template
+2. Search for "SCA Content Gate" in the widget panel
+3. Drag and drop the widget onto your page
+4. Configure access control settings:
+   - MemberPress Product IDs (comma-separated)
+   - Required User Roles (comma-separated slugs)
+   - Specific User IDs (comma-separated)
+   - Match Logic: ANY (OR) or ALL (AND)
+   - Invert Result: Show to unauthorized users instead
+5. Add your content in the "Authorized Content" field
+6. Optionally add "Unauthorized Content" to show to users without access
+
+#### Beaver Builder
+1. Open any Beaver Builder page
+2. Search for "SCA Content Gate" in the module panel
+3. Add the module to your layout
+4. Configure access control in the "Access Control" tab
+5. Add your content in the "Content" tab
+6. Save and publish
+
+**Note:** The widgets render content dynamically (server-side) to ensure each user sees the correct content. This prevents caching issues common with page builders.
+
 ## Shortcode Attributes
 
 ### `sca_gate`
@@ -129,13 +163,41 @@ Invert access (show content to unauthorized users):
 
 ### `sca_render`
 All attributes from `sca_gate`, plus:
-* `source` - Content source: "post_content", "featured_image", or "shortcode"
+* `source` - Content source: "post_content", "post_excerpt", "featured_image", or "shortcode"
 * `post_id` - Post ID to render from (default: "current")
 * `image_size` - WordPress image size for featured images
-* `short` - Shortcode to execute when source="shortcode"
+* `short` - Shortcode to execute when source="shortcode". Provide without brackets (e.g., `short='your_shortcode'`), the plugin will add them automatically
 
 ### `sca_member` / `sca_guest`
 Same as `sca_gate`. `sca_member` shows content to authorized users, `sca_guest` shows to unauthorized users.
+
+## Menu Visibility
+
+Control which menu items appear to which users in your WordPress navigation menus.
+
+### Accessing Menu Visibility Settings
+
+1. Go to **Appearance → Menus** (or **Appearance → Menus** depending on your theme)
+2. Expand any menu item
+3. Find the **Smart Content Access** section at the bottom
+
+### Menu Visibility Options
+
+* **Visible to everyone** (default): Menu item shows for all users
+* **Logged-in users only**: Menu item only shows to logged-in users
+* **Logged-out visitors only**: Menu item only shows to visitors who are not logged in
+* **MemberPress Product IDs**: Comma-separated product IDs - menu item shows only to users with those subscriptions
+* **Required user roles**: Comma-separated role slugs - menu item shows only to users with those roles
+* **Specific user IDs**: Comma-separated user IDs - menu item shows only to those specific users
+* **Matching logic**: Choose "any" (OR) or "all" (AND) for multiple criteria
+* **Invert result**: Checkbox to show item when conditions fail (opposite logic)
+
+### Example
+
+To show a "Members Area" link only to logged-in subscribers:
+- Set **Quick rule** to "Logged-in users only"
+- Or use **MemberPress Product IDs** with your product IDs
+- Or use **Required user roles** with "subscriber"
 
 ## Requirements
 
@@ -154,6 +216,63 @@ Same as `sca_gate`. `sca_member` shows content to authorized users, `sca_guest` 
 * Cache-busting headers
 * Elementor and Beaver Builder integration
 * Global settings configuration
+
+## Developer API
+
+### Filter Hooks
+
+#### `sca_is_authorized`
+
+Filter the authorization result before it's returned.
+
+```php
+add_filter( 'sca_is_authorized', function( $allowed, $args, $checks ) {
+    // $allowed: Current authorization result (bool)
+    // $args: The authorization arguments (array)
+    // $checks: Array of individual check results (array)
+    
+    // Example: Override for specific users
+    if ( $args['user_id'] === 123 ) {
+        return true;
+    }
+    
+    return $allowed;
+}, 10, 3 );
+```
+
+### Debug Logging
+
+When `WP_DEBUG` and `WP_DEBUG_LOG` are enabled, the plugin logs authorization checks to `wp-content/debug.log`:
+
+```
+[SCA DEBUG] Authorization check
+- User ID
+- Arguments (mp_ids, roles, users, etc.)
+- Individual check results
+- Final authorization result
+```
+
+This helps troubleshoot access issues without modifying code.
+
+### Helper Functions
+
+```php
+// Get plugin options
+$options = sca_get_options();
+
+// Convert CSV to integers
+$ids = sca_csv_to_ints( '123, 456, 789' ); // Returns [123, 456, 789]
+
+// Convert CSV to sanitized strings
+$roles = sca_csv_to_strings( 'subscriber, editor' ); // Returns ['subscriber', 'editor']
+
+// Check if content has SCA shortcodes
+$has_sca = sca_content_has_shortcodes( $content );
+
+// Debug logging
+sca_debug_log( 'Message', 'info' );
+sca_debug_log( $data_array, 'debug' );
+```
 
 ## Support
 

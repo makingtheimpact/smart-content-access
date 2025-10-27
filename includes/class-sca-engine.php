@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class SCA_Engine {
+    private static $options_cache = null;
+
     public static function is_authorized( array $args = [] ): bool {
         $current_user_id = get_current_user_id();
         $defaults        = [
@@ -26,7 +28,11 @@ class SCA_Engine {
         $args['require']        = strtolower( (string) $args['require'] ) === 'all' ? 'all' : 'any';
         $args['invert']         = (bool) $args['invert'];
 
-        $options = sca_get_options();
+        // Cache options to avoid repeated database calls on same request
+        if ( null === self::$options_cache ) {
+            self::$options_cache = sca_get_options();
+        }
+        $options = self::$options_cache;
 
         if ( empty( $args['mp_product_ids'] ) && ! empty( $options['global_mp_ids'] ) ) {
             $args['mp_product_ids'] = sca_csv_to_ints( $options['global_mp_ids'] );
@@ -73,6 +79,19 @@ class SCA_Engine {
             $allowed = ! in_array( false, $checks, true );
         } else {
             $allowed = in_array( true, $checks, true );
+        }
+
+        // Allow filtering before invert logic
+        $allowed = apply_filters( 'sca_is_authorized', $allowed, $args, $checks );
+        
+        // Debug logging
+        if ( function_exists( 'sca_debug_log' ) ) {
+            sca_debug_log( [
+                'user_id' => $user_id,
+                'args'    => $args,
+                'checks'  => $checks,
+                'allowed' => $allowed,
+            ], 'debug' );
         }
 
         return $args['invert'] ? ! $allowed : $allowed;

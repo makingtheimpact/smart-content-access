@@ -23,6 +23,16 @@ class SCA_Menus {
     }
 
     public static function save_item_meta( $menu_id, $menu_item_db_id, $args ): void {
+        // Security check: verify user has permission
+        if ( ! current_user_can( 'edit_theme_options' ) ) {
+            return;
+        }
+
+        // Verify nonce to prevent CSRF attacks
+        if ( ! isset( $_POST['update-nav-menu-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['update-nav-menu-nonce'] ) ), 'update-nav_menu' ) ) {
+            return;
+        }
+
         $mode_field   = 'sca_menu_mode_' . $menu_item_db_id;
         $mp_field     = 'sca_menu_membership_ids_' . $menu_item_db_id;
         $roles_field  = 'sca_menu_roles_' . $menu_item_db_id;

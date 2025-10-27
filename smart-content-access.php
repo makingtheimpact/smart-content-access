@@ -16,6 +16,11 @@ define( 'SCA_VERSION', '1.0.0' );
 define( 'SCA_PATH', plugin_dir_path( __FILE__ ) );
 define( 'SCA_URL', plugin_dir_url( __FILE__ ) );
 
+// Load plugin text domain for translations
+add_action( 'plugins_loaded', static function() {
+    load_plugin_textdomain( 'smart-content-access', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+}, 1 );
+
 require_once SCA_PATH . 'includes/helpers.php';
 require_once SCA_PATH . 'includes/class-sca-engine.php';
 require_once SCA_PATH . 'includes/class-sca-memberpress.php';

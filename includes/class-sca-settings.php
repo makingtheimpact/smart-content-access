@@ -113,8 +113,9 @@ class SCA_Settings {
             <h2><?php esc_html_e( 'Usage', 'smart-content-access' ); ?></h2>
             <pre>[sca_gate mp_ids="123,456" require="any" roles="subscriber" users="9050"]<?php esc_html_e( 'Hidden for guests', 'smart-content-access' ); ?>[/sca_gate]</pre>
             <pre>[sca_render source="post_content"]</pre>
+            <pre>[sca_render source="post_excerpt"]</pre>
             <pre>[sca_render source="featured_image" image_size="large"]</pre>
-            <pre>[sca_render source="shortcode" short='[render_secure_video_embed_aw]']</pre>
+            <pre>[sca_render source="shortcode" short='your_shortcode']</pre>
             <pre>[sca_member]<?php esc_html_e( 'For authorized', 'smart-content-access' ); ?>[/sca_member]   [sca_guest]<?php esc_html_e( 'For guests', 'smart-content-access' ); ?>[/sca_guest]</pre>
         </div>
         <?php

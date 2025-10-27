@@ -54,6 +54,29 @@ function sca_content_has_shortcodes( string $content ): bool {
         || has_shortcode( $content, 'sca_guest' );
 }
 
+/**
+ * Debug logging helper
+ * 
+ * @param mixed  $message Message or data to log
+ * @param string $type    Log type: debug, info, warning, error
+ * @return void
+ */
+function sca_debug_log( $message, string $type = 'debug' ): void {
+    if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG || ! defined( 'WP_DEBUG_LOG' ) || ! WP_DEBUG_LOG ) {
+        return;
+    }
+
+    $prefix = '[SCA ' . strtoupper( $type ) . '] ';
+    
+    if ( is_array( $message ) || is_object( $message ) ) {
+        $message = $prefix . print_r( $message, true );
+    } else {
+        $message = $prefix . $message;
+    }
+    
+    error_log( $message );
+}
+
 add_filter( 'the_content', static function( $content ) {
     if ( sca_content_has_shortcodes( (string) $content ) ) {
         $GLOBALS['sca_should_bust_cache'] = true;

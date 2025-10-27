@@ -105,7 +105,40 @@ class SCA_Shortcodes {
                 if ( $raw === '' ) {
                     return '';
                 }
-                return do_shortcode( $raw );
+                
+                // Strip brackets if provided (for safety)
+                $raw = trim( $raw, '[]' );
+                
+                // Reconstruct the shortcode safely
+                $shortcode = '[' . $raw . ']';
+                
+                return do_shortcode( $shortcode );
+
+            case 'post_excerpt':
+                $excerpt = get_post_field( 'post_excerpt', $post_id );
+                
+                // If no excerpt is set, generate one from content
+                if ( empty( $excerpt ) ) {
+                    $content = get_post_field( 'post_content', $post_id );
+                    
+                    // Strip shortcodes to remove embeds, videos, etc.
+                    $content = strip_shortcodes( $content );
+                    
+                    // Strip all HTML tags to get clean text only
+                    $content = wp_strip_all_tags( $content );
+                    
+                    // Remove any remaining URLs (YouTube, Vimeo links, etc.)
+                    $content = preg_replace( '#https?://\S+#', '', $content );
+                    
+                    // Clean up extra whitespace
+                    $content = preg_replace( '/\s+/', ' ', $content );
+                    $content = trim( $content );
+                    
+                    // Generate excerpt from cleaned content
+                    $excerpt = wp_trim_words( $content, 55, '...' );
+                }
+                
+                return apply_filters( 'the_excerpt', $excerpt );
 
             case 'post_content':
             default:
