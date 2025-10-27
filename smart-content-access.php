@@ -19,12 +19,14 @@ define( 'SCA_URL', plugin_dir_url( __FILE__ ) );
 require_once SCA_PATH . 'includes/helpers.php';
 require_once SCA_PATH . 'includes/class-sca-engine.php';
 require_once SCA_PATH . 'includes/class-sca-memberpress.php';
+require_once SCA_PATH . 'includes/class-sca-menus.php';
 require_once SCA_PATH . 'includes/class-sca-shortcodes.php';
 require_once SCA_PATH . 'includes/class-sca-settings.php';
 
 add_action( 'plugins_loaded', static function() {
     SCA_Settings::init();
     SCA_Shortcodes::init();
+    SCA_Menus::init();
 
     $el = SCA_PATH . 'includes/integrations/class-sca-elementor.php';
     if ( file_exists( $el ) ) {
