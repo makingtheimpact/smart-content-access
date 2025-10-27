@@ -134,20 +134,24 @@ Invert access (show content to unauthorized users):
 2. Search for "SCA Content Gate" in the widget panel
 3. Drag and drop the widget onto your page
 4. Configure access control settings:
-   - MemberPress Product IDs (comma-separated)
-   - Required User Roles (comma-separated slugs)
-   - Specific User IDs (comma-separated)
-   - Match Logic: ANY (OR) or ALL (AND)
-   - Invert Result: Show to unauthorized users instead
-5. Add your content in the "Authorized Content" field
+   - **MemberPress Product IDs** (comma-separated) - Leave blank to use global settings or show to all
+   - **Required User Roles** (comma-separated slugs like `subscriber, editor`)
+   - **Specific User IDs** (comma-separated IDs like `123, 456`)
+   - **Match Logic**: ANY (OR) or ALL (AND) for multiple criteria
+   - **Invert Result**: Show to unauthorized users instead
+5. Add your content in the "Authorized Content" field (shortcodes supported!)
 6. Optionally add "Unauthorized Content" to show to users without access
+
+**Default Behavior:** If all fields are left blank, the widget uses the global settings from **Settings → Smart Content Access**. You can paste HTML, shortcodes, and formatted text in the content fields.
 
 #### Beaver Builder
 1. Open any Beaver Builder page
 2. Search for "SCA Content Gate" in the module panel
 3. Add the module to your layout
-4. Configure access control in the "Access Control" tab
-5. Add your content in the "Content" tab
+4. Configure access control in the "Access Control" tab:
+   - Leave fields blank to inherit global settings
+   - Use MemberPress IDs, roles, or user IDs as needed
+5. Add your content in the "Content" tab (shortcodes supported!)
 6. Save and publish
 
 **Note:** The widgets render content dynamically (server-side) to ensure each user sees the correct content. This prevents caching issues common with page builders.

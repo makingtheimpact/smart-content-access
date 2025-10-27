@@ -201,11 +201,13 @@ class SCA_Elementor_Content_Gate_Widget extends \Elementor\Widget_Base {
         // Display appropriate content
         if ( $is_authorized ) {
             echo '<div class="sca-content-gate sca-authorized">';
-            echo wp_kses_post( $settings['authorized_content'] );
+            // Process shortcodes and sanitize
+            echo do_shortcode( wp_kses_post( $settings['authorized_content'] ) );
             echo '</div>';
         } elseif ( ! empty( $settings['unauthorized_content'] ) ) {
             echo '<div class="sca-content-gate sca-unauthorized">';
-            echo wp_kses_post( $settings['unauthorized_content'] );
+            // Process shortcodes and sanitize
+            echo do_shortcode( wp_kses_post( $settings['unauthorized_content'] ) );
             echo '</div>';
         }
 
