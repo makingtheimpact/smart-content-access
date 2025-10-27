@@ -3,7 +3,7 @@
  * Plugin Name: Smart Content Access
  * Description: Cache-agnostic content gating via shortcodes. Supports MemberPress (optional), global plan IDs, roles, and user rules. Works with Elementor & Beaver via shortcodes.
  * Version: 1.0.0
- * Author: Making The Impact, LLC
+ * Author: Making The Impact LLC
  * License: GPL-2.0+
  * Requires PHP: 7.4
  */
